@@ -48,9 +48,20 @@
 	<key>SUEnableJavaScript</key>
 	<string>YES</string>
 	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/noah-nuebling/mac-mouse-fix/update-feed/appcast.xml</string>
+	<!-- PATCH [dttxorg]: redirected to a local placeholder. Combined with the
+	     DISABLE_UPDATES compile flag, this prevents the build from ever
+	     talking to the upstream update feed. Defense-in-depth: if anything
+	     ever triggers Sparkle (e.g. a leftover "Check for Updates..." menu
+	     item), the request stays on localhost. -->
+	<string>http://127.0.0.1:0/mac-mouse-fix-disabled/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string>ZC69ciDfGYN4t3kwRiPc2SC7J4hchv9w+FfVv59r4+U=</string>
+	<!-- PATCH [dttxorg]: cleared so even if a stray appcast is fetched, the
+	     EdDSA signature verification will fail and Sparkle will refuse to
+	     install anything. The original key is preserved here in the comment
+	     below for reference:
+	         ZC69ciDfGYN4t3kwRiPc2SC7J4hchv9w+FfVv59r4+U=
+	-->
+	<string></string>
 	<key>UIDesignRequiresCompatibility</key>
 	<true/>
 </dict>

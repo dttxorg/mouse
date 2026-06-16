@@ -307,6 +307,23 @@ static NSDictionary *sideButtonActions;
     
     /// Configure Sparkle Updater
     ///  (See https://sparkle-project.org/documentation/customization/)
+    ///
+    /// PATCH [dttxorg]: when DISABLE_UPDATES is set in Active Compilation Conditions,
+    /// the entire updater code path is compiled out — no Sparkle singleton, no
+    /// background check, no menu bar "Check for Updates..." item will function.
+    /// SUFeedURL is also redirected in Info.plist to a local placeholder as a
+    /// defense-in-depth in case anything still triggers a fetch.
+    
+#if DISABLE_UPDATES
+    
+    DDLogInfo(@"Sparkle updater disabled at compile time (DISABLE_UPDATES)");
+    /// `firstVersionLaunch` is declared above (line ~306) and is also used
+    /// inside the `#else` branch below. When DISABLE_UPDATES is set, the
+    /// `#else` branch is compiled out, so the variable would otherwise
+    /// generate an unused-variable warning. Touch it here to silence that.
+    (void)firstVersionLaunch;
+    
+#else
     
     /// Some configuration is done via Info.plist, and seemingly can't be done from code
     /// Some more configuration is done from SparkleUpdaterController.m
@@ -351,6 +368,8 @@ static NSDictionary *sideButtonActions;
         
         [up checkForUpdatesInBackground];
     }
+    
+#endif /// DISABLE_UPDATES
     
 }
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {

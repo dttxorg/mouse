@@ -1,0 +1,34 @@
+// =============================================================================
+//  dttxorg-patch.xcconfig
+//  ---------------------------------------------------------------------------
+//  Compile-time flags for the "no-license-wall, no-auto-update" personal build.
+//
+//  Apply this file (or copy the values out) once per fresh checkout:
+//
+//      Xcode → File → Project Settings... (or Workspace Settings...) →
+//      Based on Configuration File → *select this xcconfig* for every
+//      Mac Mouse Fix build configuration you plan to use (Debug / Release).
+//
+//  Equivalently, you can paste the SWIFT_ACTIVE_COMPILATION_CONDITIONS and
+//  GCC_PREPROCESSOR_DEFINITIONS values into the project's Build Settings
+//  directly — they're just three flags total.
+//
+//  Author of the patch: zhuli (dttxorg30@gmail.com)
+//  Patch branch:       patch/disable-updates-and-license-wall
+// =============================================================================
+
+
+// --- Swift: kill the 30-day trial + Gumroad license check ------------------
+// FORCE_LICENSED already exists in upstream code (see License.swift
+// licenseStateFromOverrides()). Setting it makes the override branch return
+// MFLicenseState(isLicensed: true, ...) for every run.
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) FORCE_LICENSED
+
+
+// --- C / Objective-C / C++: kill Sparkle updater ---------------------------
+// DISABLE_UPDATES is a NEW flag introduced in this patch. See the `#if
+// DISABLE_UPDATES` block in App/AppDelegate.m — the entire updater
+// initialization is compiled out, so no network request ever goes to the
+// upstream appcast. The Info.plist SUFeedURL is also redirected to
+// 127.0.0.1 as a second line of defense.
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) DISABLE_UPDATES=1
