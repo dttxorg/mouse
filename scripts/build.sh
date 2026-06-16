@@ -26,13 +26,19 @@ CONFIG="${1:-Release}"
 echo "==> Config: $CONFIG"
 
 # 1. Resolve SPM packages (creates build/SourcePackages/checkouts/).
-echo "==> Resolving SPM packages..."
-xcodebuild \
-    -project "Mouse Fix.xcodeproj" \
-    -scheme "App - Release" \
-    -configuration "$CONFIG" \
-    -derivedDataPath ./build \
-    -resolvePackageDependencies
+#    Skip if checkouts already exist to avoid issues with paths containing
+#    spaces/CJK characters that break git submodule clones.
+if [ -d "build/SourcePackages/checkouts" ]; then
+    echo "==> SPM packages already resolved (build/SourcePackages/checkouts exists). Skipping resolve."
+else
+    echo "==> Resolving SPM packages..."
+    xcodebuild \
+        -project "Mouse Fix.xcodeproj" \
+        -scheme "App - Release" \
+        -configuration "$CONFIG" \
+        -derivedDataPath ./build \
+        -resolvePackageDependencies
+fi
 
 # 2. Patch CocoaLumberjack for Xcode 26. Idempotent.
 echo "==> Patching CocoaLumberjack for Xcode 26..."
@@ -42,6 +48,10 @@ if [ -f "$SPM_TARGET" ]; then
 else
     echo "WARN: $SPM_TARGET not found after resolve — skipping patch." >&2
 fi
+
+# 2b. Patch ReactiveCocoaObjC for Xcode 26 (modulemap for ObjC target). Idempotent.
+echo "==> Patching ReactiveCocoaObjC for Xcode 26..."
+./scripts/patch-reactivecocoa.sh
 
 # 3. Build.
 echo "==> Building..."
